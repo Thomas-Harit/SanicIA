@@ -8,7 +8,6 @@
 NAME		=		game
 
 SRC			=		src/main.cpp \
-					src/game.cpp
 
 OBJ			=	    $(SRC:.c=.o)
 
