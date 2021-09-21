@@ -2,15 +2,15 @@
 ** EPITECH PROJECT, 2021
 ** atelierJPO
 ** File description:
-** Brick
+** Ground
 */
 
-#include "Brick.hpp"
+#include "Ground.hpp"
 
-Brick::Brick()
+Ground::Ground()
 {
 }
 
-Brick::~Brick()
+Ground::~Ground()
 {
 }
