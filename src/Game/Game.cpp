@@ -5,12 +5,15 @@
 ** Game
 */
 
-#include "Game.hpp"
+#include "Game/Game.hpp"
 #include <iostream>
 #include <fstream>
 
 Game::Game()
 {
+    sf::VideoMode videomode(1280, 720);
+
+    Window.create(videomode, "JPO");
     Window.setFramerateLimit(60);
     textures["tileset"].loadFromFile("./sprites/Tileset.png");
     textures["sanic_run"].loadFromFile("./sprites/sanic_run.png");
@@ -24,13 +27,14 @@ Game::~Game()
 
 void Game::Draw()
 {
-    Window.clear(sf::Color::White);
+    Window.clear(sf::Color::Cyan);
     for (Ground it : grounds) {
         Window.draw(it.getSprite());
     }
     for (Obstacle it : obstacles) {
         Window.draw(it.getSprite());
     }
+    Window.display();
 }
 
 void Game::Loop()
@@ -68,6 +72,12 @@ void Game::MapReader(const std::string &filename)
         }
         y += 1;
     }
+    for (Ground &it : grounds) {
+        it.setDecal(0, Window.getSize().y - y * 30);
+    }
+    for (Obstacle &it : obstacles) {
+        it.setDecal(0, Window.getSize().y - y * 30);
+    }
 }
 
 void Game::placeGround(int x, int y, char var)
@@ -79,16 +89,16 @@ void Game::placeGround(int x, int y, char var)
     switch (var)
     {
         case '1':
-            rect = sf::IntRect(1, 57, 30, 30);
+            rect = sf::IntRect(31, 57, 30, 30);
             break;
         case '2':
-            rect = sf::IntRect(1, 87, 30, 30);
+            rect = sf::IntRect(31, 87, 30, 30);
             break;
         case '3':
-            rect = sf::IntRect(161, 58, 30, 30);
+            rect = sf::IntRect(191, 58, 30, 30);
             break;
         default:
-            rect = sf::IntRect(161, 88, 30, 30);
+            rect = sf::IntRect(191, 88, 30, 30);
             break;    
     }
     sprite.setTextureRect(rect);
@@ -116,5 +126,5 @@ void Game::placeObstacles(int x, int y, char var)
     }
     sprite.setTextureRect(rect);
     obstacles.push_back(sprite);
-    obstacles.back().setPos(x, y + rect.top - 30);
+    obstacles.back().setPos(x * 30, y * 30 - rect.height + 32);
 }

@@ -5,7 +5,7 @@
 ** main
 */
 
-#include "Game.hpp"
+#include "Game/Game.hpp"
 
 int main(int ac, char **av)
 {

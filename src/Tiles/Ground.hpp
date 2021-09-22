@@ -20,10 +20,13 @@ class Ground {
         void setSprite(sf::Sprite newSprite);
 
         void setPos(float newX, float newY);
+        void setDecal(float newDecalX, float newDecalY);
 
         sf::Sprite sprite;
         float x;
         float y;
+        float decalX;
+        float decalY;
 
     protected:
     private:

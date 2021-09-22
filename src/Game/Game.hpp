@@ -10,9 +10,9 @@
 #include <string>
 #include <map>
 
-#include "IA.hpp"
-#include "Ground.hpp"
-#include "Obstacle.hpp"
+#include "IA/IA.hpp"
+#include "Tiles/Ground.hpp"
+#include "Tiles/Obstacle.hpp"
 
 class Game {
 public: 

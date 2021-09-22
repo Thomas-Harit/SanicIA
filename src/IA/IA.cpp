@@ -5,7 +5,7 @@
 ** IA
 */
 
-#include "IA.hpp"
+#include "IA/IA.hpp"
 
 IA::IA()
 {

@@ -17,7 +17,7 @@ OBJ			=	    $(SRC:.cpp=.o)
 
 CFLAGS		=		-W -Werror -Wall -Wextra -g
 
-CPPFLAGS	=		-I./include
+CPPFLAGS	=		-I./src
 
 SFML		=		-lsfml-window -lsfml-system -lsfml-graphics
 

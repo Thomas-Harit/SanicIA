@@ -5,9 +5,9 @@
 ** Ground
 */
 
-#include "Ground.hpp"
+#include "Tiles/Ground.hpp"
 
-Ground::Ground(sf::Sprite &mSprite) : sprite(mSprite)
+Ground::Ground(sf::Sprite &mSprite) : sprite(mSprite), x(0), y(0)
 {
 }
 
@@ -25,8 +25,16 @@ void Ground::setSprite(sf::Sprite newSprite)
     sprite = newSprite;
 }
 
+void Ground::setDecal(float newDecalX, float newDecalY)
+{
+    decalX = newDecalX;
+    decalY = newDecalY;
+    sprite.setPosition(x + decalX, y + decalY);
+}
+
 void Ground::setPos(float newX, float newY)
 {
     x = newX;
     y = newY;
+    sprite.setPosition(x + decalX, y + decalY);
 }

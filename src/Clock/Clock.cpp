@@ -5,7 +5,7 @@
 ** Clock
 */
 
-#include "Clock.hpp"
+#include "Clock/Clock.hpp"
 
 Clock::Clock()
 {
