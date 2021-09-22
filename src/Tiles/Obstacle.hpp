@@ -13,13 +13,13 @@
 
 class Obstacle {
     public:
-        Obstacle();
+        Obstacle(sf::Sprite &mSprite);
         ~Obstacle();
-
-        void Draw(const sf::RenderWindow &window);
 
         sf::Sprite &getSprite();
         void setSprite(sf::Sprite newSprite);
+
+        void setPos(float newX, float newY);
 
         sf::Sprite sprite;
         float x;

@@ -11,21 +11,29 @@
 #include <map>
 
 #include "IA.hpp"
+#include "Ground.hpp"
+#include "Obstacle.hpp"
 
 class Game {
 public: 
-    Game(void);
-    ~Game(void) = default;
+    Game();
+    ~Game(void);
 
-    void Draw(const std::string &name);
+    void Draw(void);
     void Loop(void);
+    void Event(void);
+
+    void MapReader(const std::string &filename);
+    void placeGround(int x, int y, char var);
+    void placeObstacles(int x, int y, char var);
 
     sf::RenderWindow Window;
 
 private:
-    std::map<std::string, sf::Texture> Textures;
-    std::map<std::string, sf::Sprite> Sprites;
-    IA Sonic;
+    std::map<std::string, sf::Texture> textures;
+    std::vector<Ground> grounds;
+    std::vector<Obstacle> obstacles;
+    IA Sanic;
 };
 
 #endif /* GAME_HPP_ */

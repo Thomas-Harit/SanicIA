@@ -8,8 +8,12 @@
 NAME		=		game
 
 SRC			=		src/main.cpp \
+					src/Game/Game.cpp	\
+					src/Tiles/Ground.cpp	\
+					src/Tiles/Obstacle.cpp	\
+					src/IA/IA.cpp	\
 
-OBJ			=	    $(SRC:.c=.o)
+OBJ			=	    $(SRC:.cpp=.o)
 
 CFLAGS		=		-W -Werror -Wall -Wextra -g
 

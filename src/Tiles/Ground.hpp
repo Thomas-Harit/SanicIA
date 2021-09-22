@@ -13,15 +13,14 @@
 
 class Ground {
     public:
-        Ground(sf::Texture &texture);
+        Ground(sf::Sprite &mSprite);
         ~Ground();
-
-        void Draw(const sf::RenderWindow &window);
         
         sf::Sprite &getSprite();
         void setSprite(sf::Sprite newSprite);
 
-        //sf::Texture &texture;
+        void setPos(float newX, float newY);
+
         sf::Sprite sprite;
         float x;
         float y;
