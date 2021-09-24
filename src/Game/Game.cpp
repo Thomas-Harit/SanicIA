@@ -45,6 +45,7 @@ void Game::Loop()
 {
     while (Window.isOpen()) {
         this->Sanic.Gravity();
+        this->Sanic.Run();
         this->Sanic.Animation();
         this->Draw();
         this->Event();

@@ -6,8 +6,9 @@
 */
 
 #include "IA.hpp"
+#include <iostream>
 
-IA::IA() : isJumping(false), isFalling(false), SpriteIt(-1), speed(0), gravity(5)
+IA::IA() : isJumping(false), isFalling(false), SpriteIt(-1), speed(1), gravity(7)
 {
 }
 
@@ -15,7 +16,7 @@ IA::IA(const IA &other) : run_text(other.run_text), jump_text(other.jump_text), 
 {
     isJumping = false;
     isFalling = false;
-    speed = 0;
+    speed = 1;
     gravity = 5;
 }
 
@@ -44,17 +45,46 @@ void IA::Jump()
     }
 }
 
+void IA::Run()
+{
+    sf::FloatRect rect_1 = this->sprite.getGlobalBounds();
+    sf::FloatRect rect_2;
+
+    rect_1.left += speed;
+    for (auto it : obstacles) {
+        rect_2 = it.sprite.getGlobalBounds();
+        if (rect_1.intersects(rect_2)) {
+            if (isJumping == false && isFalling == false)
+                this->SpriteIt = -1;
+            this->speed = 0;
+            return;
+        }
+    }
+    for (auto it : grounds) {
+        rect_2 = it.sprite.getGlobalBounds();
+        if (rect_1.intersects(rect_2)) {
+            if (isJumping == false && isFalling == false)
+                this->SpriteIt = -1;
+            this->speed = 0;
+            return;
+        }
+    }
+    this->sprite.move(speed, 0);
+}
+
 void IA::Gravity()
 {
     sf::FloatRect rect_1;
     sf::FloatRect rect_2;
+    sf::FloatRect rect_inter;
 
     if (isJumping == true)
         return;
     rect_1 = this->sprite.getGlobalBounds();
     rect_1.top += gravity;
     for (auto it : obstacles) {
-        if (rect_1.intersects(rect_2)) {
+        rect_2 = it.sprite.getGlobalBounds();
+        if (rect_1.intersects(rect_2, rect_inter)) {
             if (this->isFalling == true)
                 this->SpriteIt = -1;
             this->isFalling = false;
@@ -63,10 +93,11 @@ void IA::Gravity()
     }
     for (auto it : grounds) {
         rect_2 = it.sprite.getGlobalBounds();
-        if (rect_1.intersects(rect_2)) {
+        if (rect_1.intersects(rect_2, rect_inter)) {
             if (this->isFalling == true)
                 this->SpriteIt = -1;
             this->isFalling = false;
+            this->sprite.setPosition(rect_1.left, rect_1.top - rect_inter.height);
             return;
         }
     }
