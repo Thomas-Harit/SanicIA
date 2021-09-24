@@ -5,7 +5,7 @@
 ** Ground
 */
 
-#include "Tiles/Ground.hpp"
+#include "Ground.hpp"
 
 Ground::Ground(sf::Sprite &mSprite) : sprite(mSprite), x(0), y(0)
 {

@@ -17,6 +17,9 @@ Game::Game()
     Window.setFramerateLimit(60);
     textures["tileset"].loadFromFile("./sprites/Tileset.png");
     textures["sanic_run"].loadFromFile("./sprites/sanic_run.png");
+    textures["sanic_still"].loadFromFile("./sprites/sanic_still.png");
+    textures["sanic_jump"].loadFromFile("./sprites/sanic_in_the_air.png");
+    Sanic.updateTexture(textures["sanic_run"], textures["sanic_jump"], textures["sanic_still"]);
 }
 
 Game::~Game()
@@ -34,12 +37,15 @@ void Game::Draw()
     for (Obstacle it : obstacles) {
         Window.draw(it.getSprite());
     }
+    Window.draw(Sanic.sprite);
     Window.display();
 }
 
 void Game::Loop()
 {
     while (Window.isOpen()) {
+        this->Sanic.Gravity();
+        this->Sanic.Animation();
         this->Draw();
         this->Event();
     }
@@ -78,6 +84,7 @@ void Game::MapReader(const std::string &filename)
     for (Obstacle &it : obstacles) {
         it.setDecal(0, Window.getSize().y - y * 30);
     }
+    Sanic.updateMap(this->obstacles, this->grounds);
 }
 
 void Game::placeGround(int x, int y, char var)
