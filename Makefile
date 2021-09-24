@@ -12,6 +12,7 @@ SRC			=		src/main.cpp \
 					src/Tiles/Ground.cpp	\
 					src/Tiles/Obstacle.cpp	\
 					src/IA/IA.cpp	\
+					src/IA/Sanic.cpp	\
 					src/Clock/Clock.cpp	\
 
 OBJ			=	    $(SRC:.cpp=.o)

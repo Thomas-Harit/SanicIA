@@ -8,7 +8,7 @@
 #include "IA.hpp"
 #include <iostream>
 
-IA::IA() : isJumping(false), isFalling(false), SpriteIt(-1), speed(1), gravity(7)
+IA::IA() : isJumping(false), isFalling(false), SpriteIt(-1), speed(0), gravity(7)
 {
 }
 
@@ -16,14 +16,18 @@ IA::IA(const IA &other) : run_text(other.run_text), jump_text(other.jump_text), 
 {
     isJumping = false;
     isFalling = false;
-    speed = 1;
-    gravity = 5;
+    speed = speed;
+    gravity = gravity;
 }
 
 void IA::GoFaster()
 {
     if (isFalling == false && isJumping == false) {
-        speed += 1;
+        if (speed == 0) {
+            SpriteIt = -1;
+        }
+        if (speed <= 50)
+            speed += 1;
     }
 }
 
@@ -40,8 +44,13 @@ void IA::GoSlower()
 
 void IA::Jump()
 {
-    if (isFalling == false) {
+    if (isFalling == false && isJumping == false) {
+        jumpHeight = gravity * 10;
+        if (speed > 0)
+            jumpHeight *= speed / 10;
         isJumping = true;
+        SpriteIt = -1;
+        jumpHeight = this->sprite.getGlobalBounds().top - jumpHeight;
     }
 }
 
@@ -50,12 +59,14 @@ void IA::Run()
     sf::FloatRect rect_1 = this->sprite.getGlobalBounds();
     sf::FloatRect rect_2;
 
+    if (speed <= 0)
+        return;
     rect_1.left += speed;
     for (auto it : obstacles) {
         rect_2 = it.sprite.getGlobalBounds();
         if (rect_1.intersects(rect_2)) {
-            if (isJumping == false && isFalling == false)
-                this->SpriteIt = -1;
+            this->SpriteIt = -1;
+            this->isJumping = false;
             this->speed = 0;
             return;
         }
@@ -63,8 +74,8 @@ void IA::Run()
     for (auto it : grounds) {
         rect_2 = it.sprite.getGlobalBounds();
         if (rect_1.intersects(rect_2)) {
-            if (isJumping == false && isFalling == false)
-                this->SpriteIt = -1;
+            this->SpriteIt = -1;
+            this->isJumping = false;
             this->speed = 0;
             return;
         }
@@ -78,8 +89,13 @@ void IA::Gravity()
     sf::FloatRect rect_2;
     sf::FloatRect rect_inter;
 
-    if (isJumping == true)
-        return;
+    if (isJumping == true) {
+        this->sprite.move(0, -1 * gravity);
+        if (this->sprite.getGlobalBounds().top <= jumpHeight) { 
+            this->isJumping = false;
+        } else
+            return;
+    }
     rect_1 = this->sprite.getGlobalBounds();
     rect_1.top += gravity;
     for (auto it : obstacles) {
@@ -180,10 +196,10 @@ bool IA::IsThereAHole(float distance)
     rect_1.left += distance;
     for (auto it : grounds) {
         rect_2 = it.sprite.getGlobalBounds();
-        if (rect_1.intersects(rect_2) == false)
-            return true;
+        if (rect_1.intersects(rect_2) == true)
+            return false;
     }
-    return false;
+    return true;
 }
 
 bool IA::IsThereAnObstacle(float distance)
@@ -191,6 +207,7 @@ bool IA::IsThereAnObstacle(float distance)
     sf::FloatRect rect_1 = this->sprite.getGlobalBounds();
     sf::FloatRect rect_2;
 
+    rect_1.left += distance;
     for (auto it : obstacles) {
         rect_2 = it.sprite.getGlobalBounds();
         if (rect_1.intersects(rect_2) == true)

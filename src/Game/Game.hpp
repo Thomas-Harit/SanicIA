@@ -28,6 +28,7 @@ public:
     void placeObstacles(int x, int y, char var);
 
     sf::RenderWindow Window;
+    sf::View view;
 
 private:
     std::map<std::string, sf::Texture> textures;

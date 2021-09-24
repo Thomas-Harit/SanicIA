@@ -13,6 +13,8 @@ Game::Game()
 {
     sf::VideoMode videomode(1280, 720);
 
+    view.setCenter(1280/2, 720/2);
+    view.setSize(1280, 720);
     Window.create(videomode, "JPO");
     Window.setFramerateLimit(60);
     textures["tileset"].loadFromFile("./sprites/Tileset.png");
@@ -20,6 +22,7 @@ Game::Game()
     textures["sanic_still"].loadFromFile("./sprites/sanic_still.png");
     textures["sanic_jump"].loadFromFile("./sprites/sanic_in_the_air.png");
     Sanic.updateTexture(textures["sanic_run"], textures["sanic_jump"], textures["sanic_still"]);
+    Window.setView(this->view);
 }
 
 Game::~Game()
@@ -30,6 +33,10 @@ Game::~Game()
 
 void Game::Draw()
 {
+    if (this->Sanic.sprite.getGlobalBounds().left >= 200) {
+        this->view.setCenter(this->Sanic.sprite.getGlobalBounds().left + 440, 360);
+        Window.setView(view);
+    }
     Window.clear(sf::Color::Cyan);
     for (Ground it : grounds) {
         Window.draw(it.getSprite());
@@ -47,6 +54,7 @@ void Game::Loop()
         this->Sanic.Gravity();
         this->Sanic.Run();
         this->Sanic.Animation();
+        this->Sanic.Loop();
         this->Draw();
         this->Event();
     }

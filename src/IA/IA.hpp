@@ -20,6 +20,8 @@ class IA {
         IA(const IA &other);
         ~IA() = default;
 
+        void Loop();
+
         void GoFaster();
         void GoSlower();
         void Jump();
@@ -42,6 +44,8 @@ class IA {
         sf::Sprite sprite;
         float speed;
         float gravity;
+        float jumpHeight;
+
     protected:
     private:
         Clock clock;
