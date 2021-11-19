@@ -28,5 +28,5 @@
 
 void IA::Loop()
 {
-    
+    this->GoFaster();
 }

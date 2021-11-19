@@ -27,7 +27,9 @@ class IA {
         void Jump();
 
         void Gravity(void);
-        void Run(void);
+        void ResolveCollision(sf::FloatRect inter);
+        void Collision(void);
+        void Move(void);
 
         void Animation();
         void AnimationRunning();
@@ -51,7 +53,8 @@ class IA {
         Clock clock;
         bool isJumping;
         bool isFalling;
-        int SpriteIt;
+        int AnimationState;
+        sf::Vector2i velocity;
         sf::Texture run_text;
         sf::Texture jump_text;
         sf::Texture still_text;

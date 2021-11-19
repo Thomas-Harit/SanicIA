@@ -8,143 +8,125 @@
 #include "IA.hpp"
 #include <iostream>
 
-IA::IA() : isJumping(false), isFalling(false), SpriteIt(-1), speed(0), gravity(7)
+IA::IA() : isJumping(false), isFalling(false), gravity(3), velocity({0, 0}), AnimationState(0)
 {
+    this->sprite.setTexture(still_text, true);
 }
 
-IA::IA(const IA &other) : run_text(other.run_text), jump_text(other.jump_text), still_text(other.still_text), SpriteIt(-1)
+IA::IA(const IA &other) : run_text(other.run_text), jump_text(other.jump_text), still_text(other.still_text), gravity(other.gravity), velocity(other.velocity), AnimationState(other.AnimationState)
 {
-    isJumping = false;
-    isFalling = false;
-    speed = speed;
-    gravity = gravity;
+    this->sprite.setTexture(still_text, true);
 }
 
 void IA::GoFaster()
 {
-    if (isFalling == false && isJumping == false) {
-        if (speed == 0) {
-            SpriteIt = -1;
-        }
-        if (speed <= 50)
-            speed += 1;
+    if (velocity.y >= -0.5 && this->velocity.y <= 0.5) {
+        velocity.x += 10;
     }
 }
 
 void IA::GoSlower()
 {
-    if (isFalling == false && isJumping == false && speed > 0) {
-        speed -= 1;
-        if (speed <= 0) {
-            speed = 0;
-            SpriteIt = -1;
-        }
-    }
+    //if (velocity.x >= 1) {
+    //    velocity.x -= 1;
+    //} else {
+    //    velocity.x = 0;
+    //}
 }
 
 void IA::Jump()
 {
-    if (isFalling == false && isJumping == false) {
-        jumpHeight = gravity * 10;
-        if (speed > 0)
-            jumpHeight *= speed / 10;
-        isJumping = true;
-        SpriteIt = -1;
-        jumpHeight = this->sprite.getGlobalBounds().top - jumpHeight;
-    }
-}
-
-void IA::Run()
-{
-    sf::FloatRect rect_1 = this->sprite.getGlobalBounds();
-    sf::FloatRect rect_2;
-
-    if (speed <= 0)
-        return;
-    rect_1.left += speed;
-    for (auto it : obstacles) {
-        rect_2 = it.sprite.getGlobalBounds();
-        if (rect_1.intersects(rect_2)) {
-            this->SpriteIt = -1;
-            this->isJumping = false;
-            this->speed = 0;
-            return;
-        }
-    }
-    for (auto it : grounds) {
-        rect_2 = it.sprite.getGlobalBounds();
-        if (rect_1.intersects(rect_2)) {
-            this->SpriteIt = -1;
-            this->isJumping = false;
-            this->speed = 0;
-            return;
-        }
-    }
-    this->sprite.move(speed, 0);
 }
 
 void IA::Gravity()
 {
-    sf::FloatRect rect_1;
-    sf::FloatRect rect_2;
-    sf::FloatRect rect_inter;
+    velocity.y += this->gravity;
+    if (velocity.y > this->gravity) {
+        velocity.y = this->gravity;
+    }
+}
 
-    if (isJumping == true) {
-        this->sprite.move(0, -1 * gravity);
-        if (this->sprite.getGlobalBounds().top <= jumpHeight) { 
-            this->isJumping = false;
-        } else
-            return;
+void IA::ResolveCollision(sf::FloatRect inter)
+{
+    float scale = 0;
+
+    std::cout << "*** COLLISION ***" << std::endl;
+    std::cout << "Velocity : " << this->velocity.x << " | " << this->velocity.y << std::endl;
+    if (this->velocity.x != 0 && this->velocity.y != 0 && inter.width / std::abs(this->velocity.x) >= inter.height / std::abs(this->velocity.y)) {
+        scale = inter.height / std::abs(this->velocity.y);
+    } else if (this->velocity.x != 0) {
+        scale = inter.width / std::abs(this->velocity.x);
+    } else if (this->velocity.y != 0) {
+        scale = inter.height / std::abs(this->velocity.y);
+    } else if (inter.height > inter.width) {
+        this->velocity.x = -1 * inter.width;
+    } else {
+        this->velocity.y = -1 * inter.height;
     }
-    rect_1 = this->sprite.getGlobalBounds();
-    rect_1.top += gravity;
-    for (auto it : obstacles) {
-        rect_2 = it.sprite.getGlobalBounds();
-        if (rect_1.intersects(rect_2, rect_inter)) {
-            if (this->isFalling == true)
-                this->SpriteIt = -1;
-            this->isFalling = false;
-            return;
+    this->velocity.x -= this->velocity.x * scale;
+    this->velocity.y -= this->velocity.y * scale;
+    std::cout << "INTER.WIDTH = " << inter.width << " | INTER.HEIGHT = " << inter.height << std::endl;
+    std::cout << "FORCE.X = " << this->velocity.x * scale << " | FORCE.Y = " << this->velocity.y * scale << std::endl;
+    std::cout << "New Velocity : " << this->velocity.x << " | " << this->velocity.y << std::endl << std::endl;
+}
+
+void IA::Collision(void)
+{
+    sf::FloatRect inter;
+    sf::FloatRect SanicRect = this->sprite.getGlobalBounds();
+    sf::FloatRect ObjRect;
+
+    SanicRect.left += this->velocity.x;
+    SanicRect.top += this->velocity.y;
+    for (auto it : this->obstacles) {
+        ObjRect = it.getSprite().getGlobalBounds();
+        if (ObjRect.intersects(SanicRect, inter)) {
+            this->ResolveCollision(inter);
+            SanicRect = this->sprite.getGlobalBounds();
+            SanicRect.left += this->velocity.x;
+            SanicRect.top += this->velocity.y;
         }
     }
-    for (auto it : grounds) {
-        rect_2 = it.sprite.getGlobalBounds();
-        if (rect_1.intersects(rect_2, rect_inter)) {
-            if (this->isFalling == true)
-                this->SpriteIt = -1;
-            this->isFalling = false;
-            this->sprite.setPosition(rect_1.left, rect_1.top - rect_inter.height);
-            return;
+    for (auto it : this->grounds) {
+        ObjRect = it.getSprite().getGlobalBounds();
+        if (ObjRect.intersects(SanicRect, inter)) {
+            this->ResolveCollision(inter);
+            SanicRect = this->sprite.getGlobalBounds();
+            SanicRect.left += this->velocity.x;
+            SanicRect.top += this->velocity.y;
         }
     }
-    if (this->isFalling == false)
-                this->SpriteIt = -1;
-    this->isFalling = true;
-    this->sprite.move(0, gravity);
+}
+
+void IA::Move(void)
+{
+    this->sprite.move(this->velocity.x, this->velocity.y);
 }
 
 void IA::Animation()
 {
-    if (isFalling == true || isJumping == true) {
+    if (this->velocity.y < -0.5 || this->velocity.y > 0.5) {
         this->AnimationInTheAir();
-    } else if (speed > 0) {
+        this->AnimationState = 1;
+    } else if (this->velocity.x != 0) {
         this->AnimationRunning();
-    } else if (SpriteIt == -1) {
+        this->AnimationState = 2;
+    } else if (this->AnimationState != 0) {
         this->sprite.setTexture(still_text, true);
-        SpriteIt += 1;
+        this->AnimationState = 0;
     }
 }
 
 void IA::AnimationRunning()
 {
     sf::IntRect rect(0, 0, 48, 36);
+    static int i = 0;
     float timing = 0.1;
 
-    if (SpriteIt == -1) {
-        this->sprite.setTexture(run_text);
-        rect.left = 0;
+    if (this->AnimationState != 2) {
+        this->sprite.setTexture(run_text, true);
+        i = 0;
         this->sprite.setTextureRect(rect);
-        SpriteIt += 1;
         clock.reset();
     }
     if (speed > 0)
@@ -152,25 +134,25 @@ void IA::AnimationRunning()
     else
         timing = 0.1;
     if (clock.time() >= timing) {
-        SpriteIt += 1;
-        if (SpriteIt > 3)
-            SpriteIt = 0;
-        rect.left = SpriteIt * 48;
+        rect.left = i * 48;
+        if (i >= 3)
+            i = 0;
         this->sprite.setTextureRect(rect);
         clock.reset();
+        i += 1;
     }
 }
 
 void IA::AnimationInTheAir()
 {
     sf::IntRect rect(0, 0, 34, 35);
+    static int i = 0;
     float timing = 0.1;
 
-    if (SpriteIt == -1) {
-        this->sprite.setTexture(jump_text);
-        rect.left = 0;
+    if (this->AnimationState != 1) {
+        this->sprite.setTexture(jump_text, true);
+        i = 0;
         this->sprite.setTextureRect(rect);
-        SpriteIt += 1;
         clock.reset();
     }
     if (speed > 0)
@@ -178,12 +160,12 @@ void IA::AnimationInTheAir()
     else
         timing = 0.1;
     if (clock.time() >= timing) {
-        SpriteIt += 1;
-        if (SpriteIt > 3)
-            SpriteIt = 0;
-        rect.left = SpriteIt * 34;
+        rect.left = i * 34;
+        if (i >= 3)
+            i = 0;
         this->sprite.setTextureRect(rect);
         clock.reset();
+        i += 1;
     }
 }
 
