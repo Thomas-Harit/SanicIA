@@ -13,6 +13,8 @@
 #include "Tiles/Obstacle.hpp"
 #include "Tiles/Ground.hpp"
 #include <memory>
+#include <functional>
+#include <optional>
 
 class IA {
     public:
@@ -26,10 +28,10 @@ class IA {
         void GoSlower();
         void Jump();
 
-        void Gravity(void);
-        void ResolveCollision(sf::FloatRect inter);
-        void Collision(void);
-        void Move(void);
+        void Jumping();
+        void Falling();
+        sf::FloatRect Collision(void);
+        void Run(void);
 
         void Animation();
         void AnimationRunning();
@@ -46,13 +48,14 @@ class IA {
         sf::Sprite sprite;
         float speed;
         float gravity;
-        float jumpHeight;
 
     protected:
     private:
         Clock clock;
         bool isJumping;
         bool isFalling;
+        float JumpingSpeed;
+        float JumpingHeight;
         int AnimationState;
         sf::Vector2i velocity;
         sf::Texture run_text;

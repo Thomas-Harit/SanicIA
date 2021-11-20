@@ -29,4 +29,7 @@
 void IA::Loop()
 {
     this->GoFaster();
+    if (this->speed >= 30) {
+        this->Jump();
+    }
 }

@@ -51,11 +51,10 @@ void Game::Draw()
 void Game::Loop()
 {
     while (Window.isOpen()) {
-        this->Sanic.Gravity();
-        this->Sanic.Collision();
         this->Sanic.Loop();
-        this->Sanic.Collision();
-        this->Sanic.Move();
+        this->Sanic.Jumping();
+        this->Sanic.Falling();
+        this->Sanic.Run();
         this->Sanic.Animation();
         this->Draw();
         this->Event();

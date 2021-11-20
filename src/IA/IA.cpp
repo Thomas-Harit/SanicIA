@@ -8,110 +8,126 @@
 #include "IA.hpp"
 #include <iostream>
 
-IA::IA() : isJumping(false), isFalling(false), gravity(3), velocity({0, 0}), AnimationState(0)
+IA::IA() : isJumping(false), isFalling(true), gravity(5), AnimationState(0), JumpingSpeed(5), JumpingHeight(0)
 {
     this->sprite.setTexture(still_text, true);
 }
 
-IA::IA(const IA &other) : run_text(other.run_text), jump_text(other.jump_text), still_text(other.still_text), gravity(other.gravity), velocity(other.velocity), AnimationState(other.AnimationState)
+IA::IA(const IA &other) : run_text(other.run_text), jump_text(other.jump_text), still_text(other.still_text),
+                        gravity(other.gravity), velocity(other.velocity), AnimationState(other.AnimationState),
+                        JumpingSpeed(other.JumpingSpeed), JumpingHeight(other.JumpingHeight)
 {
     this->sprite.setTexture(still_text, true);
 }
 
 void IA::GoFaster()
 {
-    if (velocity.y >= -0.5 && this->velocity.y <= 0.5) {
-        velocity.x += 10;
+    if (this->isFalling == false && this->isJumping == false && this->speed < 50) {
+        this->speed += 2;
+        if (this->speed > 50)
+            this->speed = 50;
     }
 }
 
 void IA::GoSlower()
 {
-    //if (velocity.x >= 1) {
-    //    velocity.x -= 1;
-    //} else {
-    //    velocity.x = 0;
-    //}
+    if (this->isFalling == false && this->isJumping == false && this->speed > 0) {
+        this->speed -= 5;
+        if (this->speed < 0)
+            this->speed = 0;
+    }
 }
 
 void IA::Jump()
 {
-}
-
-void IA::Gravity()
-{
-    velocity.y += this->gravity;
-    if (velocity.y > this->gravity) {
-        velocity.y = this->gravity;
+    if (this->isFalling == false && this->isJumping == false) {
+        this->isJumping = true;
+        if (this->speed > 10) {
+            this->JumpingSpeed = this->speed / 10;
+            this->JumpingHeight = this->sprite.getPosition().y - this->speed * 5;
+        } else {
+            this->JumpingSpeed = 5;
+            this->JumpingHeight = this->sprite.getPosition().y - 100;
+        }
     }
 }
 
-void IA::ResolveCollision(sf::FloatRect inter)
+void IA::Falling()
 {
-    float scale = 0;
+    sf::FloatRect rect;
 
-    std::cout << "*** COLLISION ***" << std::endl;
-    std::cout << "Velocity : " << this->velocity.x << " | " << this->velocity.y << std::endl;
-    if (this->velocity.x != 0 && this->velocity.y != 0 && inter.width / std::abs(this->velocity.x) >= inter.height / std::abs(this->velocity.y)) {
-        scale = inter.height / std::abs(this->velocity.y);
-    } else if (this->velocity.x != 0) {
-        scale = inter.width / std::abs(this->velocity.x);
-    } else if (this->velocity.y != 0) {
-        scale = inter.height / std::abs(this->velocity.y);
-    } else if (inter.height > inter.width) {
-        this->velocity.x = -1 * inter.width;
-    } else {
-        this->velocity.y = -1 * inter.height;
+    if (this->isJumping == false) {
+        this->isFalling = true;
+        this->sprite.move(0, this->gravity);
+        for (rect = this->Collision(); rect.width != 0 && rect.height != 0; rect = this->Collision()) {
+            this->sprite.move(0, -1 * rect.height);
+            this->isFalling = false;
+            std::cout << "MOVE UP : " << rect.height << std::endl;
+        }
     }
-    this->velocity.x -= this->velocity.x * scale;
-    this->velocity.y -= this->velocity.y * scale;
-    std::cout << "INTER.WIDTH = " << inter.width << " | INTER.HEIGHT = " << inter.height << std::endl;
-    std::cout << "FORCE.X = " << this->velocity.x * scale << " | FORCE.Y = " << this->velocity.y * scale << std::endl;
-    std::cout << "New Velocity : " << this->velocity.x << " | " << this->velocity.y << std::endl << std::endl;
 }
 
-void IA::Collision(void)
+void IA::Jumping()
 {
-    sf::FloatRect inter;
+    sf::FloatRect rect;
+
+    if (this->isJumping == true) {
+        std::cout << this->JumpingHeight << std::endl;
+        this->JumpingSpeed += this->JumpingSpeed * 0.1;
+        this->sprite.move(0, -1 * this->JumpingSpeed);
+        for (rect = this->Collision(); rect.width != 0 && rect.height != 0; rect = this->Collision()) {
+            this->sprite.move(0, rect.height);
+            this->isJumping = false;
+            this->JumpingSpeed = 5;
+        }
+        if (this->sprite.getPosition().y <= this->JumpingHeight) {
+            this->isJumping = false;
+            this->JumpingSpeed = 5;
+        }
+    }
+}
+
+sf::FloatRect IA::Collision(void)
+{
+    sf::FloatRect inter = {0, 0, 0, 0};
     sf::FloatRect SanicRect = this->sprite.getGlobalBounds();
     sf::FloatRect ObjRect;
 
-    SanicRect.left += this->velocity.x;
-    SanicRect.top += this->velocity.y;
     for (auto it : this->obstacles) {
         ObjRect = it.getSprite().getGlobalBounds();
         if (ObjRect.intersects(SanicRect, inter)) {
-            this->ResolveCollision(inter);
-            SanicRect = this->sprite.getGlobalBounds();
-            SanicRect.left += this->velocity.x;
-            SanicRect.top += this->velocity.y;
+            return inter;
         }
     }
     for (auto it : this->grounds) {
         ObjRect = it.getSprite().getGlobalBounds();
         if (ObjRect.intersects(SanicRect, inter)) {
-            this->ResolveCollision(inter);
-            SanicRect = this->sprite.getGlobalBounds();
-            SanicRect.left += this->velocity.x;
-            SanicRect.top += this->velocity.y;
+            return inter;
         }
     }
+    return inter;
 }
 
-void IA::Move(void)
+void IA::Run(void)
 {
-    this->sprite.move(this->velocity.x, this->velocity.y);
+    sf::FloatRect rect;
+
+    this->sprite.move(this->speed, 0);
+    for (rect = this->Collision(); rect.width != 0 && rect.height != 0; rect = this->Collision()) {
+        this->sprite.move(-1 * rect.width, 0);
+        this->speed = 0;
+    }
 }
 
 void IA::Animation()
 {
-    if (this->velocity.y < -0.5 || this->velocity.y > 0.5) {
+    if (this->isFalling || this->isJumping) {
         this->AnimationInTheAir();
         this->AnimationState = 1;
-    } else if (this->velocity.x != 0) {
+    } else if (this->speed > 0) {
         this->AnimationRunning();
         this->AnimationState = 2;
-    } else if (this->AnimationState != 0) {
+    } else {
         this->sprite.setTexture(still_text, true);
         this->AnimationState = 0;
     }
