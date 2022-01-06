@@ -6,6 +6,7 @@
 */
 
 #include "IA/IA.hpp"
+#include <iostream>
 
 /*
 *
@@ -28,8 +29,9 @@
 
 void IA::Loop()
 {
-    this->GoFaster();
-    if (this->speed >= 30) {
+    if (this->speed < 30) {
+        this->GoFaster();
+    } else {
         this->Jump();
     }
 }

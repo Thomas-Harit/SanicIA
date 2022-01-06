@@ -24,8 +24,8 @@ void IA::GoFaster()
 {
     if (this->isFalling == false && this->isJumping == false && this->speed < 50) {
         this->speed += 2;
-        if (this->speed > 50)
-            this->speed = 50;
+        if (this->speed > 500)
+            this->speed = 500;
     }
 }
 
@@ -55,14 +55,17 @@ void IA::Jump()
 void IA::Falling()
 {
     sf::FloatRect rect;
+    static int i = 0;
 
     if (this->isJumping == false) {
         this->isFalling = true;
         this->sprite.move(0, this->gravity);
-        for (rect = this->Collision(); rect.width != 0 && rect.height != 0; rect = this->Collision()) {
+        rect = this->Collision(); 
+        if (rect.height != 0) {
+            //std::cout << "GROUND COLLISION " << i << " :" << std::endl;
+            //std::cout << rect.width << " | " << rect.height << std::endl << std::endl;
             this->sprite.move(0, -1 * rect.height);
             this->isFalling = false;
-            std::cout << "MOVE UP : " << rect.height << std::endl;
         }
     }
 }
@@ -72,10 +75,9 @@ void IA::Jumping()
     sf::FloatRect rect;
 
     if (this->isJumping == true) {
-        std::cout << this->JumpingHeight << std::endl;
         this->JumpingSpeed += this->JumpingSpeed * 0.1;
         this->sprite.move(0, -1 * this->JumpingSpeed);
-        for (rect = this->Collision(); rect.width != 0 && rect.height != 0; rect = this->Collision()) {
+        for (rect = this->Collision(); rect.height != 0; rect = this->Collision()) {
             this->sprite.move(0, rect.height);
             this->isJumping = false;
             this->JumpingSpeed = 5;
@@ -105,7 +107,7 @@ sf::FloatRect IA::Collision(void)
             return inter;
         }
     }
-    return inter;
+    return {0, 0, 0, 0};
 }
 
 void IA::Run(void)
@@ -113,7 +115,7 @@ void IA::Run(void)
     sf::FloatRect rect;
 
     this->sprite.move(this->speed, 0);
-    for (rect = this->Collision(); rect.width != 0 && rect.height != 0; rect = this->Collision()) {
+    for (rect = this->Collision(); rect.width != 0; rect = this->Collision()) {
         this->sprite.move(-1 * rect.width, 0);
         this->speed = 0;
     }
